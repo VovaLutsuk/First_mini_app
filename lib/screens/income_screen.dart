@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:intl/intl.dart';
 
 class IncomeScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onAddRecord;
@@ -14,6 +16,33 @@ class _IncomeScreenState extends State<IncomeScreen> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   String? _selectedCurrency;
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  void _listen(TextEditingController controller) async {
+    bool available = await _speech.initialize();
+    if (available && !_isListening) {
+      setState(() => _isListening = true);
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            controller.text = result.recognizedWords;
+            _isListening = false;
+          });
+        },
+        localeId: 'uk-UA',
+      );
+    } else if (_isListening) {
+      _speech.stop();
+      setState(() => _isListening = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +57,13 @@ class _IncomeScreenState extends State<IncomeScreen> {
           children: <Widget>[
             TextField(
               controller: _amountController,
-              decoration: InputDecoration(labelText: 'Сума прибутку'),
+              decoration: InputDecoration(
+                labelText: 'Сума прибутку',
+                suffixIcon: IconButton(
+                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
+                  onPressed: () => _listen(_amountController),
+                ),
+              ),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 16.0),
@@ -50,13 +85,38 @@ class _IncomeScreenState extends State<IncomeScreen> {
             SizedBox(height: 16.0),
             TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Коментар'),
+              decoration: InputDecoration(
+                labelText: 'Коментар',
+                suffixIcon: IconButton(
+                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
+                  onPressed: () => _listen(_descriptionController),
+                ),
+              ),
             ),
             SizedBox(height: 16.0),
             TextField(
               controller: _dateController,
-              decoration: InputDecoration(labelText: 'Дата (yyyy-mm-dd)'),
-              keyboardType: TextInputType.datetime,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Дата',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      locale: Locale('uk', 'UA'),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                      });
+                    }
+                  },
+                ),
+              ),
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
