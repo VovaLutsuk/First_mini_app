@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/expenses_screen.dart';
 import 'screens/income_screen.dart';
 import 'screens/list_screen.dart';
@@ -32,6 +33,15 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
         onAddRecord: _addRecord,
         dataList: _dataList,
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('uk', 'UA'), // Українська
+        Locale('en', 'US'), // Англійська
+      ],
     );
   }
 }

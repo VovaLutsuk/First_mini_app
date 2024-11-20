@@ -26,19 +26,17 @@ class _IncomeScreenState extends State<IncomeScreen> {
   }
 
   void _listen(TextEditingController controller) async {
-    bool available = await _speech.initialize();
-    if (available && !_isListening) {
+    if (!_isListening && await _speech.initialize()) {
       setState(() => _isListening = true);
       _speech.listen(
         onResult: (result) {
           setState(() {
             controller.text = result.recognizedWords;
-            _isListening = false;
           });
         },
         localeId: 'uk-UA',
       );
-    } else if (_isListening) {
+    } else {
       _speech.stop();
       setState(() => _isListening = false);
     }
@@ -47,9 +45,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Прибутки'),
-      ),
+      appBar: AppBar(title: Text('Прибутки')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -57,43 +53,21 @@ class _IncomeScreenState extends State<IncomeScreen> {
           children: <Widget>[
             TextField(
               controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Сума прибутку',
-                suffixIcon: IconButton(
-                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
-                  onPressed: () => _listen(_amountController),
-                ),
-              ),
+              decoration: InputDecoration(labelText: 'Сума прибутку'),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 16.0),
             DropdownButtonFormField<String>(
               value: _selectedCurrency,
-              items: ['USD', 'EUR', 'UAH'].map((String currency) {
-                return DropdownMenuItem<String>(
-                  value: currency,
-                  child: Text(currency),
-                );
+              items: ['USD', 'EUR', 'UAH'].map((currency) {
+                return DropdownMenuItem(value: currency, child: Text(currency));
               }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedCurrency = newValue;
-                });
-              },
+              onChanged: (newValue) => setState(() => _selectedCurrency = newValue),
               decoration: InputDecoration(labelText: 'Валюта'),
             ),
-            SizedBox(height: 16.0),
             TextField(
               controller: _descriptionController,
-              decoration: InputDecoration(
-                labelText: 'Коментар',
-                suffixIcon: IconButton(
-                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
-                  onPressed: () => _listen(_descriptionController),
-                ),
-              ),
+              decoration: InputDecoration(labelText: 'Коментар'),
             ),
-            SizedBox(height: 16.0),
             TextField(
               controller: _dateController,
               readOnly: true,
@@ -107,34 +81,33 @@ class _IncomeScreenState extends State<IncomeScreen> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100),
-                      locale: Locale('uk', 'UA'),
+                      locale: const Locale('uk', 'UA'),
                     );
                     if (pickedDate != null) {
                       setState(() {
-                        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                        _dateController.text =
+                            DateFormat('yyyy-MM-dd').format(pickedDate);
                       });
                     }
                   },
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 if (_amountController.text.isNotEmpty &&
-                    _selectedCurrency != null &&
-                    _dateController.text.isNotEmpty) {
+                    _selectedCurrency != null) {
                   widget.onAddRecord({
                     'type': 'Прибуток',
                     'amount': double.tryParse(_amountController.text) ?? 0.0,
                     'currency': _selectedCurrency,
-                    'date': DateTime.tryParse(_dateController.text) ?? DateTime.now(),
+                    'date': _dateController.text,
                     'description': _descriptionController.text,
                   });
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Будь ласка, заповніть всі поля')),
+                    SnackBar(content: Text('Заповніть усі поля')),
                   );
                 }
               },

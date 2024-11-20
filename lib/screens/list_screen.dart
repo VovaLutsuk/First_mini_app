@@ -9,25 +9,23 @@ class ListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Список записів'),
-      ),
+      appBar: AppBar(title: Text('Список записів')),
       body: dataList.isEmpty
-          ? Center(
-        child: Text('Немає записів'),
-      )
+          ? Center(child: Text('Немає записів'))
           : ListView.builder(
         itemCount: dataList.length,
         itemBuilder: (context, index) {
           final item = dataList[index];
-
-          // Форматуємо дату для відображення
-          String formattedDate = DateFormat('yyyy-MM-dd').format(item['date']);
+          String formattedDate = DateFormat('yyyy-MM-dd').format(
+            DateTime.tryParse(item['date'].toString()) ?? DateTime.now(),
+          );
 
           return Card(
-            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            margin: const EdgeInsets.symmetric(
+                vertical: 8.0, horizontal: 16.0),
             child: ListTile(
-              title: Text('${item['type']}: ${item['amount']} ${item['currency']}'),
+              title: Text(
+                  '${item['type']}: ${item['amount']} ${item['currency']}'),
               subtitle: Text(
                 'Дата: $formattedDate\nКоментар: ${item['description']}',
               ),
