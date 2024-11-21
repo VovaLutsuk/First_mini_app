@@ -3,6 +3,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/expenses_screen.dart';
 import 'screens/income_screen.dart';
 import 'screens/list_screen.dart';
+import 'autorization/login_screen.dart';
+import 'autorization/registration_screen.dart';
+import 'database.dart'; // Для доступу до бази даних
 
 void main() {
   runApp(ExpenseTrackerApp());
@@ -14,11 +17,22 @@ class ExpenseTrackerApp extends StatefulWidget {
 }
 
 class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
-  final List<Map<String, dynamic>> _dataList = [];
+  bool isLoggedIn = false; // Перевірка чи користувач авторизований
+  int? userId; // Ідентифікатор користувача
+  List<Map<String, dynamic>> dataList = []; // Список записів
 
+  // Функція для авторизації
+  void _login(int id) {
+    setState(() {
+      isLoggedIn = true;
+      userId = id; // Призначаємо id користувача
+    });
+  }
+
+  // Функція для додавання запису
   void _addRecord(Map<String, dynamic> newRecord) {
     setState(() {
-      _dataList.add(newRecord);
+      dataList.add(newRecord);
     });
   }
 
@@ -29,18 +43,35 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(
-        onAddRecord: _addRecord,
-        dataList: _dataList,
-      ),
+      initialRoute: isLoggedIn ? '/home' : '/login',
+      routes: {
+        '/login': (context) => LoginScreen(onLogin: _login),
+        '/register': (context) => RegistrationScreen(),
+        '/home': (context) => HomePage(
+          onAddRecord: _addRecord,
+          dataList: dataList,
+          userId: userId ?? 1, // Якщо користувач не авторизований, використовуємо значення за замовчуванням
+        ),
+        '/expenses': (context) => ExpensesScreen(
+          userId: userId ?? 1,
+          onAddRecord: _addRecord,
+        ),
+        '/income': (context) => IncomeScreen(
+          userId: userId ?? 1,
+          onAddRecord: _addRecord,
+        ),
+        '/list': (context) => ListScreen(
+          dataList: dataList,
+        ),
+      },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('uk', 'UA'), // Українська
-        Locale('en', 'US'), // Англійська
+        Locale('uk', 'UA'),
+        Locale('en', 'US'),
       ],
     );
   }
@@ -49,49 +80,37 @@ class _ExpenseTrackerAppState extends State<ExpenseTrackerApp> {
 class HomePage extends StatelessWidget {
   final Function(Map<String, dynamic>) onAddRecord;
   final List<Map<String, dynamic>> dataList;
+  final int userId;
 
-  HomePage({required this.onAddRecord, required this.dataList});
+  HomePage({
+    required this.onAddRecord,
+    required this.dataList,
+    required this.userId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Контроль витрат'),
-      ),
+      appBar: AppBar(title: Text('Контроль витрат')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ExpensesScreen(onAddRecord: onAddRecord),
-                  ),
-                );
+                Navigator.pushNamed(context, '/expenses');
               },
               child: Text('Витрати'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => IncomeScreen(onAddRecord: onAddRecord),
-                  ),
-                );
+                Navigator.pushNamed(context, '/income');
               },
               child: Text('Прибутки'),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ListScreen(dataList: dataList),
-                  ),
-                );
+                Navigator.pushNamed(context, '/list');
               },
               child: Text('Список'),
             ),

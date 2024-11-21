@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 
 class ExpensesScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onAddRecord;
+  final int userId;
 
-  ExpensesScreen({required this.onAddRecord});
+  ExpensesScreen({required this.onAddRecord, required this.userId});
 
   @override
   _ExpensesScreenState createState() => _ExpensesScreenState();
@@ -102,6 +103,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     'currency': _selectedCurrency,
                     'date': _dateController.text,
                     'description': _descriptionController.text,
+                    'user_id': widget.userId, // Додаємо user_id
                   });
                   Navigator.pop(context);
                 } else {

@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 
 class IncomeScreen extends StatefulWidget {
   final Function(Map<String, dynamic>) onAddRecord;
+  final int userId;
 
-  IncomeScreen({required this.onAddRecord});
+  IncomeScreen({required this.onAddRecord, required this.userId});
 
   @override
   _IncomeScreenState createState() => _IncomeScreenState();
@@ -49,7 +50,6 @@ class _IncomeScreenState extends State<IncomeScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextField(
               controller: _amountController,
@@ -103,6 +103,7 @@ class _IncomeScreenState extends State<IncomeScreen> {
                     'currency': _selectedCurrency,
                     'date': _dateController.text,
                     'description': _descriptionController.text,
+                    'user_id': widget.userId, // Додаємо user_id
                   });
                   Navigator.pop(context);
                 } else {
