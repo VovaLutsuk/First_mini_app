@@ -99,11 +99,11 @@ class _IncomeScreenState extends State<IncomeScreen> {
                     _selectedCurrency != null) {
                   widget.onAddRecord({
                     'type': 'Прибуток',
-                    'amount': double.tryParse(_amountController.text) ?? 0.0,
+                    'amount': double.parse(_amountController.text),
                     'currency': _selectedCurrency,
                     'date': _dateController.text,
                     'description': _descriptionController.text,
-                    'user_id': widget.userId, // Додаємо user_id
+                    'user_id': widget.userId,
                   });
                   Navigator.pop(context);
                 } else {

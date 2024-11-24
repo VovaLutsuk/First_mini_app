@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import '/database.dart';
 
-class RegistrationScreen extends StatelessWidget {
-  final _usernameController = TextEditingController();
-  final _loginController = TextEditingController();
-  final _passwordController = TextEditingController();
+class RegistrationScreen extends StatefulWidget {
+  @override
+  _RegistrationScreenState createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-
-  void _submitRegistration(BuildContext context) {
-    if (_formKey.currentState?.validate() ?? false) {
-      // додати логіку для збереження користувача
-      Navigator.pop(context);
-    }
-  }
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,23 +21,24 @@ class RegistrationScreen extends StatelessWidget {
         child: Form(
           key: _formKey,
           child: Column(
-            children: <Widget>[
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
               TextFormField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Ім\'я користувача'),
+                decoration: InputDecoration(labelText: 'Ім\'я'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Будь ласка, введіть ім\'я користувача';
+                    return 'Будь ласка, введіть ім\'я';
                   }
                   return null;
                 },
               ),
               TextFormField(
-                controller: _loginController,
-                decoration: InputDecoration(labelText: 'Логін'),
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Електронна пошта'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Будь ласка, введіть логін';
+                    return 'Будь ласка, введіть електронну пошту';
                   }
                   return null;
                 },
@@ -48,15 +48,35 @@ class RegistrationScreen extends StatelessWidget {
                 decoration: InputDecoration(labelText: 'Пароль'),
                 obscureText: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Будь ласка, введіть пароль';
+                  if (value == null || value.length < 7) {
+                    return 'Пароль повинен містити мінімум 7 символів';
                   }
                   return null;
                 },
               ),
               ElevatedButton(
-                onPressed: () => _submitRegistration(context),
+                onPressed: () async {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    await DatabaseHelper.addUser(
+                      _usernameController.text,
+                      _emailController.text,
+                      _passwordController.text,
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Реєстрація успішна!')),
+                    );
+
+                    Navigator.pushReplacementNamed(context, '/login');
+                  }
+                },
                 child: Text('Зареєструватися'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: Text('Повернутися до входу'),
               ),
             ],
           ),

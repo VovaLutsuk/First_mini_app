@@ -103,7 +103,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     'currency': _selectedCurrency,
                     'date': _dateController.text,
                     'description': _descriptionController.text,
-                    'user_id': widget.userId, // Додаємо user_id
+                    'user_id': widget.userId,
                   });
                   Navigator.pop(context);
                 } else {

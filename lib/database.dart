@@ -10,15 +10,17 @@ class DatabaseHelper {
 
     _database = await openDatabase(
       join(await getDatabasesPath(), 'expense_tracker.db'),
-      onCreate: (db, version) {
-        return db.execute(
-            '''
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute('''
           CREATE TABLE users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
-            email TEXT,
+            email TEXT UNIQUE,
             password TEXT
-          ),
+          )
+        ''');
+        await db.execute('''
           CREATE TABLE records(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -27,12 +29,10 @@ class DatabaseHelper {
             currency TEXT,
             date TEXT,
             description TEXT,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
           )
-          '''
-        );
+        ''');
       },
-      version: 1,
     );
     return _database!;
   }
@@ -74,7 +74,14 @@ class DatabaseHelper {
   }
 
   // Додавання запису (витрати або прибутки)
-  static Future<int> addRecord(int userId, String type, double amount, String currency, String date, String description) async {
+  static Future<int> addRecord(
+      int userId,
+      String type,
+      double amount,
+      String currency,
+      String date,
+      String description,
+      ) async {
     final db = await getDatabase();
     return await db.insert(
       'records',
@@ -97,6 +104,26 @@ class DatabaseHelper {
       'records',
       where: 'user_id = ?',
       whereArgs: [userId],
+      orderBy: 'date DESC',
     );
+  }
+
+  // Видалення запису за його ID
+  static Future<int> deleteRecord(int id) async {
+    final db = await getDatabase();
+    return await db.delete(
+      'records',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Закриття бази даних
+  static Future<void> closeDatabase() async {
+    final db = _database;
+    if (db != null) {
+      await db.close();
+    }
+    _database = null;
   }
 }
