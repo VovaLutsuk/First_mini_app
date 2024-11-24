@@ -37,9 +37,8 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState?.validate() ?? false) {
-
                     ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Інструкції надіслані на вашу електронну пошту'))
+                      SnackBar(content: Text('Інструкції надіслані на вашу електронну пошту')),
                     );
                     Navigator.pushReplacementNamed(context, '/login');
                   }

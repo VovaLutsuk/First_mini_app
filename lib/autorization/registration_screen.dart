@@ -78,6 +78,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
                 child: Text('Повернутися до входу'),
               ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, '/password_recovery');
+                },
+                child: Text('Відновити пароль'),
+              ),
             ],
           ),
         ),

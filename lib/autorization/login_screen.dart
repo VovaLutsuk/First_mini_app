@@ -20,8 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final user = await DatabaseHelper.getUserByEmail(email);
 
-    if (user != null && user['password'] == password) {
-      widget.onLogin(user['id']); // Виклик onLogin
+    if (user == null) {
+      // Якщо користувач не знайдений
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Користувача з такою електронною поштою не існує')),
+      );
+      return;
+    }
+
+    if (user['password'] == password) {
+      widget.onLogin(user['id']); // Викликаємо onLogin
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Вхід успішний!')),
@@ -65,6 +73,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.pushReplacementNamed(context, '/register');
               },
               child: Text('Зареєструватися'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, '/password_recovery');
+              },
+              child: Text('Відновити пароль'),
             ),
           ],
         ),
